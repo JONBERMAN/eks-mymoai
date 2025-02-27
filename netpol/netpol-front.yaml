@@ -2,7 +2,7 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: frontend-deny-ingress-egress 
-  namespace: front-ns
+  namespace: front-net
 spec:
   podSelector:
     matchLabels: {}
@@ -16,7 +16,7 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: frontend-allow-egress-backend-monitoring
-  namespace: front-ns
+  namespace: front-net
 spec:
   podSelector:
     matchLabels: {}
@@ -36,13 +36,13 @@ spec:
   - to:
     - namespaceSelector:
         matchLabels:
-          app: back-ns
+          app: back-net
     - podSelector:
         matchLabels: {}
   - to:
     - namespaceSelector:
         matchLabels:
-          app: monitoring-ns
+          app: monitoring-net
     - podSelector:
         matchLabels: {}
     ports:
@@ -59,7 +59,7 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: frontend-allow-ingress-internet
-  namespace: front-ns
+  namespace: front-net
 spec:
   podSelector:
     matchLabels: {}

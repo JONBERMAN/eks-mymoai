@@ -3,7 +3,7 @@ kind: HorizontalPodAutoscaler
 metadata:
   creationTimestamp: null
   name: frontend-hpa
-  namespace: front-ns
+  namespace: front-net
 spec:
   maxReplicas: 6
   minReplicas: 3
@@ -26,7 +26,7 @@ kind: HorizontalPodAutoscaler
 metadata:
   creationTimestamp: null
   name: member-hpa
-  namespace: back-ns
+  namespace: back-net
 spec:
   maxReplicas: 6
   minReplicas: 3
@@ -49,7 +49,7 @@ kind: HorizontalPodAutoscaler
 metadata:
   creationTimestamp: null
   name: fairytale-hpa
-  namespace: back-ns
+  namespace: back-net
 spec:
   maxReplicas: 9
   minReplicas: 3
@@ -72,7 +72,7 @@ kind: HorizontalPodAutoscaler
 metadata:
   creationTimestamp: null
   name: bookstore-hpa
-  namespace: back-ns
+  namespace: back-net
 spec:
   maxReplicas: 6
   minReplicas: 3
@@ -95,7 +95,7 @@ kind: HorizontalPodAutoscaler
 metadata:
   creationTimestamp: null
   name: report-hpa
-  namespace: back-ns
+  namespace: back-net
 spec:
   maxReplicas: 6
   minReplicas: 3
