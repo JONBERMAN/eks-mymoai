@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: moai-front
+  name: moai-front
+  namespace: front-net
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: front
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: front
+    spec:
+      imagePullSecrets:
+        - name: harbor-registry-secret
+      containers:
+      - image: 192.168.2.141:443/k8s-project/moai-front:v10
+        name: moai-front
+        ports: 
+        - containerPort: 3000
+        envFrom:
+        - configMapRef:
+            name: frontend-config 
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: moai-front-svc
+  namespace: front-net
+spec:
+  selector:
+    app: front
+  ports:
+  - targetPort: 3000
+    port: 3000
+    nodePort: 32435
+  type: NodePort
+
+

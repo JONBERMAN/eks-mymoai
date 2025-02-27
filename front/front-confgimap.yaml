@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: frontend-config
+  namespace: front-net
+data:
+  BACKEND_URL: "http://istio-ingressgateway.istio-system.svc.cluster.local"
+  NEXT_PUBLIC_REDIRECT_URI: "https://48e8-118-218-200-33.ngrok-free.app/cognitoresponse"
+  EXTERNAL_API_URL: "http://istio-ingressgateway.istio-system.svc.cluster.local/v1"
+  OTEL_SERVICE_NAME: "frontend-service"
+  OTEL_EXPORTER_OTLP_ENDPOINT: "http://opentelmetry-collector-opentelemetry-collector.monitoring.svc.cluster.local:4317"
+  OTEL_EXPORTER_OTLP_PROTOCOL: "grpc"
+  OTEL_TRACES_SAMPLER: "always_on"
+  OTEL_PROPAGATORS: "b3"
