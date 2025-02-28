@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: spring-gateway
+  name: spring-gateway
+  namespace: back-net
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: spring-gateway
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: spring-gateway
+    spec:
+      imagePullSecrets:
+        - name: harbor-registry-secret
+
+      containers:
+      - image: 192.168.2.141:443/k8s-project/api-gateway:v6
+        name: api-gateway
+        envFrom:
+          - configMapRef:
+              name: backend-gateway-config        
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gateway-service
+  namespace: back-net
+spec:
+  selector:
+    app: spring-gateway
+  ports:
+  - name: gateway
+    targetPort: 8080
+    port: 8080
+  type: ClusterIP
+

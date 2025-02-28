@@ -18,10 +18,10 @@ spec:
       imagePullSecrets:
       - name: harbor-registry-secret
       containers:
-      - image: 192.168.2.141:443/k8s-project/backend-fairytale-service:v1
+      - image: 192.168.2.141:443/k8s-project/fairytale:v5
         name: fairytale-frankfrut
         ports:
-        - containerPort: 7004
+        - containerPort: 8082
         env:
         - name: AWS_ACCESS_KEY_ID
           valueFrom:
@@ -58,32 +58,6 @@ spec:
             configMapKeyRef:
               name: backend-config
               key: DB_READ_URL
-        - name: OTEL_SERVICE_NAME
-          valueFrom:
-            configMapKeyRef:
-              name: backend-config
-              key: OTEL_SERVICE_NAME
-        - name: OTEL_EXPORTER_OTLP_ENDPOINT
-          valueFrom:
-            configMapKeyRef:
-              name: backend-config
-              key: OTEL_EXPORTER_OTLP_ENDPOINT
-        - name: OTEL_EXPORTER_OTLP_PROTOCOL
-          valueFrom:
-            configMapKeyRef:
-              name: backend-config
-              key: OTEL_EXPORTER_OTLP_PROTOCOL
-        - name: OTEL_TRACES_SAMPLER
-          valueFrom:
-            configMapKeyRef:
-              name: backend-config
-              key: OTEL_TRACES_SAMPLER
-        - name: OTEL_PROPAGATORS
-          valueFrom:
-            configMapKeyRef:
-              name: backend-config
-              key: OTEL_PROPAGATORS
-        
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -105,7 +79,7 @@ spec:
       imagePullSecrets:
       - name: harbor-registry-secret
       containers:
-      - image: 192.168.2.141:443/k8s-project/backend-member-service:v1
+      - image: 192.168.2.141:443/k8s-project/member:v4
         name: back-member
         ports:
         - containerPort: 8081
@@ -135,32 +109,12 @@ spec:
             configMapKeyRef:
               name: backend-config
               key: DB_READ_URL
-        - name: OTEL_SERVICE_NAME
-          valueFrom:
-            configMapKeyRef:
-              name: backend-config
-              key: OTEL_SERVICE_NAME
-        - name: OTEL_EXPORTER_OTLP_ENDPOINT
-          valueFrom:
-            configMapKeyRef:
-              name: backend-config
-              key: OTEL_EXPORTER_OTLP_ENDPOINT
-        - name: OTEL_EXPORTER_OTLP_PROTOCOL
-          valueFrom:
-            configMapKeyRef:
-              name: backend-config
-              key: OTEL_EXPORTER_OTLP_PROTOCOL
-        - name: OTEL_TRACES_SAMPLER
-          valueFrom:
-            configMapKeyRef:
-              name: backend-config
-              key: OTEL_TRACES_SAMPLER
-        - name: OTEL_PROPAGATORS
-          valueFrom:
-            configMapKeyRef:
-              name: backend-config
-              key: OTEL_PROPAGATORS
 
+        - name: DB_WRITE_URL
+          value: "jdbc:mysql://192.168.3.108:3306/test_db"
+
+        - name: DB_READ_URL
+          value: "jdbc:mysql://192.168.3.109:3306/test_db"
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -182,7 +136,7 @@ spec:
       imagePullSecrets:
       - name: harbor-registry-secret
       containers:
-      - image: 192.168.2.141:443/k8s-project/backend-bookstore-service:v1
+      - image: 192.168.2.141:443/k8s-project/bookstore:v4
         name: back-bookstore
         ports:
         - containerPort: 8083
@@ -212,32 +166,6 @@ spec:
             configMapKeyRef:
               name: backend-config
               key: DB_READ_URL
-        - name: OTEL_SERVICE_NAME
-          valueFrom:
-            configMapKeyRef:
-              name: backend-config
-              key: OTEL_SERVICE_NAME
-        - name: OTEL_EXPORTER_OTLP_ENDPOINT
-          valueFrom:
-            configMapKeyRef:
-              name: backend-config
-              key: OTEL_EXPORTER_OTLP_ENDPOINT
-        - name: OTEL_EXPORTER_OTLP_PROTOCOL
-          valueFrom:
-            configMapKeyRef:
-              name: backend-config
-              key: OTEL_EXPORTER_OTLP_PROTOCOL
-        - name: OTEL_TRACES_SAMPLER
-          valueFrom:
-            configMapKeyRef:
-              name: backend-config
-              key: OTEL_TRACES_SAMPLER
-        - name: OTEL_PROPAGATORS
-          valueFrom:
-            configMapKeyRef:
-              name: backend-config
-              key: OTEL_PROPAGATORS
-
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -259,7 +187,7 @@ spec:
       imagePullSecrets:
       - name: harbor-registry-secret
       containers:
-      - image: 192.168.2.141:443/k8s-project/backend-report-service:v1
+      - image: 192.168.2.141:443/k8s-project/report:v4
         name: back-report
         ports:
         - containerPort: 8083
@@ -289,33 +217,6 @@ spec:
             configMapKeyRef:
               name: backend-config
               key: DB_READ_URL
-        - name: OTEL_SERVICE_NAME
-          valueFrom:
-            configMapKeyRef:
-              name: backend-config
-              key: OTEL_SERVICE_NAME
-        - name: OTEL_EXPORTER_OTLP_ENDPOINT
-          valueFrom:
-            configMapKeyRef:
-              name: backend-config
-              key: OTEL_EXPORTER_OTLP_ENDPOINT
-        - name: OTEL_EXPORTER_OTLP_PROTOCOL
-          valueFrom:
-            configMapKeyRef:
-              name: backend-config
-              key: OTEL_EXPORTER_OTLP_PROTOCOL
-        - name: OTEL_TRACES_SAMPLER
-          valueFrom:
-            configMapKeyRef:
-              name: backend-config
-              key: OTEL_TRACES_SAMPLER
-        - name: OTEL_PROPAGATORS
-          valueFrom:
-            configMapKeyRef:
-              name: backend-config
-              key: OTEL_PROPAGATORS
-
-
 ---
 apiVersion: v1
 kind: Service
@@ -327,7 +228,7 @@ spec:
     app: back-net
   ports:
   - name: seoul
-    targetPort: 7004
+    targetPort: 8082
     port: 8082
   type: ClusterIP
 ---

@@ -6,7 +6,7 @@ metadata:
   name: moai-front
   namespace: front-net
 spec:
-  replicas: 3
+  replicas: 1
   selector:
     matchLabels:
       app: front
@@ -19,13 +19,31 @@ spec:
       imagePullSecrets:
         - name: harbor-registry-secret
       containers:
-      - image: 192.168.2.141:443/k8s-project/moai-front:v10
+      - image: 192.168.2.141:443/k8s-project/moai-front:v18
         name: moai-front
         ports: 
         - containerPort: 3000
-        envFrom:
-        - configMapRef:
-            name: frontend-config 
+        env:
+        - name: BACKEND_URL
+          valueFrom:
+            configMapKeyRef:
+              name: frontend-config
+              key: BACKEND_URL
+        - name: NEXT_PUBLIC_REDIRECT_URI
+          valueFrom:
+            configMapKeyRef: 
+              name: frontend-config
+              key: NEXT_PUBLIC_REDIRECT_URI
+        - name: EXTERNAL_API_URL
+          valueFrom:
+            configMapKeyRef:
+              name: frontend-config
+              key: EXTERNAL_API_URL
+        - name: COGNITO_CLIENT_ID
+          valueFrom:
+            secretKeyRef:
+              name: front-secret
+              key: COGNITO_CLIENT_ID
 ---
 apiVersion: v1
 kind: Service
@@ -38,7 +56,7 @@ spec:
   ports:
   - targetPort: 3000
     port: 3000
-    nodePort: 32435
+    nodePort: 32222
   type: NodePort
 
 
