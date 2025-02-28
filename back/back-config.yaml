@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: backend-config
-  namespace: back-net
+  namespace: report
 data:
   DB_WRITE_URL: "jdbc:mysql://192.168.3.108:3306/test_db"
   DB_READ_URL: "jdbc:mysql://192.168.3.109:3306/test_db"

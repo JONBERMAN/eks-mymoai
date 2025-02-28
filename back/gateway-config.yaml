@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend-gateway-config2
+  namespace: gateway
+data:
+  MEMBER_URL: "http://member-service.member.svc.cluster.local"
+  FAIRYTALE_URL: "http://fairytale-service.fairytale.svc.cluster.local"
+  BOOKSTORE_URL: "http://bookstore-service.bookstore.svc.cluster.local"
+  REPORT_URL: "http://report-service.report.svc.cluster.local"
