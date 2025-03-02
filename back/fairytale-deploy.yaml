@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: fairytale
+  name: back-deploy-seoul
+  namespace: fairytale
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fairytale
+  template:
+    metadata:
+      labels:
+        app: fairytale
+    spec:
+      imagePullSecrets:
+      - name: harbor-registry-secret
+      containers:
+      - image: 192.168.2.141:443/k8s-project/fairytale:v7
+        name: fairytale-frankfrut
+        ports:
+        - containerPort: 8082
+
+
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+
+        env:
+        - name: AWS_ACCESS_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: back-secret
+              key: AWS_ACCESS_KEY_ID
+        - name: AWS_SECRET_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: back-secret
+              key: AWS_SECRET_ACCESS_KEY
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: back-secret
+              key: DB_WRITE_PASSWORD
+        - name: DB_WRITE_USERNAME
+          valueFrom:
+            configMapKeyRef:
+              name: backend-config
+              key: DB_WRITE_USERNAME
+        - name: DB_READ_USERNAME
+          valueFrom:
+            configMapKeyRef:
+              name: backend-config
+              key: DB_READ_USERNAME
+        - name: DB_WRITE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: backend-config
+              key: DB_WRITE_URL
+        - name: DB_READ_URL
+          valueFrom:
+            configMapKeyRef:
+              name: backend-config
+              key: DB_READ_URL
