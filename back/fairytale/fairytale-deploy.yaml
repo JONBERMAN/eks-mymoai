@@ -68,3 +68,18 @@ spec:
             configMapKeyRef:
               name: backend-config
               key: DB_READ_URL
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: fairytale-service
+  namespace: fairytale
+spec:
+  selector:
+    app: fairytale
+  ports:
+  - name: seoul
+    targetPort: 8082
+    port: 8082
+  type: ClusterIP

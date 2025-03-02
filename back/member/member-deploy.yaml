@@ -58,3 +58,19 @@ spec:
             configMapKeyRef:
               name: backend-config
               key: DB_READ_URL
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: member-service
+  namespace: member
+spec:
+  selector:
+    app: member
+  ports:
+  - name: member
+    targetPort: 8081
+    port: 8081
+  type: ClusterIP
+  
