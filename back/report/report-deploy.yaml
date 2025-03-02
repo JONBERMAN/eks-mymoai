@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: report
+  name: back-report
+  namespace: report
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: report
+  template:
+    metadata:
+      labels:
+        app: report
+    spec:
+      imagePullSecrets:
+      - name: harbor-registry-secret
+      containers:
+      - image: 192.168.2.141:443/k8s-project/report:v7
+        name: back-report
+        ports:
+        - containerPort: 8083
+
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+
+        env:
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: back-secret
+              key: DB_WRITE_PASSWORD
+        - name: DB_WRITE_USERNAME
+          valueFrom:
+            configMapKeyRef:
+              name: backend-config
+              key: DB_WRITE_USERNAME
+        - name: DB_READ_USERNAME
+          valueFrom:
+            configMapKeyRef:
+              name: backend-config
+              key: DB_READ_USERNAME
+        - name: DB_WRITE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: backend-config
+              key: DB_WRITE_URL
+        - name: DB_READ_URL
+          valueFrom:
+            configMapKeyRef:
+              name: backend-config
+              key: DB_READ_URL
+
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: report-service
+  namespace: report
+spec:
+  selector:
+    app: report
+  ports:
+  - name: report
+    targetPort: 8084
+    port: 8084
+  type: ClusterIP
