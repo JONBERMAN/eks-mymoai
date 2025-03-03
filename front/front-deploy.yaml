@@ -19,7 +19,7 @@ spec:
       imagePullSecrets:
         - name: harbor-registry-secret
       containers:
-      - image: 192.168.2.141:443/k8s-project/moai-front:v30
+      - image: 192.168.2.141:443/k8s-project/moai-front:v31
         name: moai-front
         ports: 
         - containerPort: 3000
