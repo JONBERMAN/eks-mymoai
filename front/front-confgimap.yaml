@@ -6,7 +6,7 @@ metadata:
 data:
   #BACKEND_URL: "http://gateway-service.back-net.svc.cluster.local:8080"
   BACKEND_URL: "http://gateway-service.gateway.svc.cluster.local:8080"
-  NEXT_PUBLIC_REDIRECT_URI: "https://1ccf-118-218-200-33.ngrok-free.app/cognitoresponse"
+  NEXT_PUBLIC_REDIRECT_URI: "https://2240-118-218-200-33.ngrok-free.app/cognitoresponse"
     #EXTERNAL_API_URL: "http://gateway-service.back-net.svc.cluster.local:8080/v1" ### 수정 필요
   EXTERNAL_API_URL: "http://gateway-service.gateway.svc.cluster.local:8080/v1" ### 수정 필요
   OTEL_SERVICE_NAME: "frontend-service"
