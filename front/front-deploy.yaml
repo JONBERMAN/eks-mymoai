@@ -19,7 +19,7 @@ spec:
       imagePullSecrets:
         - name: harbor-registry-secret
       containers:
-      - image: 192.168.2.141:443/k8s-project/moai-front:v37
+      - image: 781788730003.dkr.ecr.ap-northeast-2.amazonaws.com/eks/eks-repo/moai-front:latest
         name: moai-front
         ports: 
         - containerPort: 3000
