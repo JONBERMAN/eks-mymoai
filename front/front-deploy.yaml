@@ -16,8 +16,6 @@ spec:
       labels:
         app: front
     spec:
-      imagePullSecrets:
-        - name: harbor-registry-secret
       containers:
       - image: 781788730003.dkr.ecr.ap-northeast-2.amazonaws.com/eks/eks-repo/moai-front:latest
         name: moai-front
@@ -42,7 +40,7 @@ spec:
         - name: COGNITO_CLIENT_ID
           valueFrom:
             secretKeyRef:
-              name: front-secret
+              name: frontend-secret
               key: COGNITO_CLIENT_ID
 ---
 apiVersion: v1
@@ -50,13 +48,22 @@ kind: Service
 metadata:
   name: moai-front-svc
   namespace: front-net
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
+    service.beta.kubernetes.io/aws-load-balancer-type: "external"
+    service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
+    service.beta.kubernetes.io/aws-load-balancer-healthcheck-port: "3000"
+    service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: "true"
+    service.beta.kubernetes.io/aws-load-balancer-ssl-cert: "arn:aws:acm:ap-northeast-2:781788730003:certificate/e3ed6405-6b9b-4d8c-a03f-739b28288055"
+    service.beta.kubernetes.io/aws-load-balancer-ssl-ports: "443"
+    service.beta.kubernetes.io/aws-load-balancer-backend-protocol: "tcp"
+    service.beta.kubernetes.io/aws-load-balancer-subnets: "subnet-0516390c74768a7ef,subnet-07e8033e13c0e5fce"
 spec:
-  selector:
-    app: front
   ports:
-  - targetPort: 3000
-    port: 3000
-    nodePort: 32222
-  type: NodePort
-
-
+  - port: 443
+    targetPort: 3000
+    protocol: TCP
+  type: LoadBalancer
+  loadBalancerClass: service.k8s.aws/nlb
+  selector:
+    app: moai-front
