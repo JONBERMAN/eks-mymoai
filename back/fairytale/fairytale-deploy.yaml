@@ -16,7 +16,7 @@ spec:
         app: fairytale
     spec:
       containers:
-      - image: 781788730003.dkr.ecr.ap-northeast-2.amazonaws.com/eks/eks-repo/member:e3
+      - image: 781788730003.dkr.ecr.ap-northeast-2.amazonaws.com/eks/eks-repo/fairytale:e3
         name: fairytale
         ports:
         - containerPort: 8082
