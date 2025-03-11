@@ -17,7 +17,7 @@ spec:
         app: front
     spec:
       containers:
-      - image: 781788730003.dkr.ecr.ap-northeast-2.amazonaws.com/eks/eks-repo/moai-front:latest
+      - image: 781788730003.dkr.ecr.ap-northeast-2.amazonaws.com/eks/eks-repo/moai-front:v38
         name: moai-front
         ports: 
         - containerPort: 3000
