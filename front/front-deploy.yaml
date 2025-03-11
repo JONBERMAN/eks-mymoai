@@ -5,6 +5,9 @@ metadata:
     app: moai-front
   name: moai-front
   namespace: front-net
+  annotations:
+    notifications.argoproj.io/subscribe.on-sync-succeeded.slack: "#dev-취약점"
+    notifications.argoproj.io/subscribe.on-sync-failed.slack: "#dev-취약점"
 spec:
   replicas: 2
   selector:
