@@ -1,0 +1,21 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: api-routes
+  namespace: fairytale
+spec:
+  hosts:
+  - "*"
+  gateways:
+  - istio-system/api-gateway #어떤 gateway 참조할지 결종
+  http:
+  # 동화책 서비스
+  - match:
+    - uri:
+        prefix: /v1/fairytale/
+    route:
+    - destination:
+        host: fairytale-service.fairtale.svc.cluster.local
+        port:
+          number: 8082
+

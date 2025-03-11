@@ -1,0 +1,22 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: api-routes
+  namespace: bookstore
+spec:
+  hosts:
+  - "*"
+  gateways:
+  - istio-system/api-gateway #어떤 gateway 참조할지 결종
+  http:
+  # bookstore-service (두 개의 경로 패턴)
+  - match:
+    - uri:
+        prefix: /v1/bookstore/
+    - uri:
+        prefix: /v1/comment/
+    route:
+    - destination:
+        host: bookstore-service.bookstore.svc.cluster.local
+        port:
+          number: 8083
