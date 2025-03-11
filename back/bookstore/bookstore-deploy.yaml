@@ -15,10 +15,8 @@ spec:
       labels:
         app: bookstore
     spec:
-      imagePullSecrets:
-      - name: harbor-registry-secret
       containers:
-      - image: 192.168.2.141:443/k8s-project/bookstore:s1
+      - image: 781788730003.dkr.ecr.ap-northeast-2.amazonaws.com/eks/eks-repo/bookstore:e3
         name: back-bookstore
         ports:
         - containerPort: 8083
@@ -68,7 +66,7 @@ spec:
   selector:
     app: bookstore
   ports:
-  - name: member
+  - name: bookstore
     targetPort: 8083
     port: 8083
   type: ClusterIP

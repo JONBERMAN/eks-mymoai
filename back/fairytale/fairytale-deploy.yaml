@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   labels:
     app: fairytale
-  name: back-deploy-seoul
+  name: back-fairytale
   namespace: fairytale
 spec:
   replicas: 1
@@ -15,11 +15,9 @@ spec:
       labels:
         app: fairytale
     spec:
-      imagePullSecrets:
-      - name: harbor-registry-secret
       containers:
-      - image: 192.168.2.141:443/k8s-project/fairytale:s1
-        name: fairytale-frankfrut
+      - image: 781788730003.dkr.ecr.ap-northeast-2.amazonaws.com/eks/eks-repo/member:e3
+        name: fairytale
         ports:
         - containerPort: 8082
 
@@ -79,7 +77,7 @@ spec:
   selector:
     app: fairytale
   ports:
-  - name: seoul
+  - name: fairytale
     targetPort: 8082
     port: 8082
   type: ClusterIP
