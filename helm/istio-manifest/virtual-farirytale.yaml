@@ -15,7 +15,7 @@ spec:
         prefix: /v1/fairytale/
     route:
     - destination:
-        host: fairytale-service.fairtale.svc.cluster.local
+        host: fairytale-service.fairytale.svc.cluster.local
         port:
           number: 8082
 

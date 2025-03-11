@@ -15,7 +15,7 @@ spec:
         prefix: /v1/reports/
     route:
     - destination:
-        host: report-service.report.svc.clusterl
+        host: report-service.report.svc.cluster.local
         port:
           number: 8084
 
