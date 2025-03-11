@@ -1,0 +1,3 @@
+kustomize:
+  images:
+  - 781788730003.dkr.ecr.ap-northeast-2.amazonaws.com/eks/eks-repo/moai-front:sha256-38af476b44813a266660d804d052f7a0dc6598c97a377e0ce0c41132055de5ee.sig
