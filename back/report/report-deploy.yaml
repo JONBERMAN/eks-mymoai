@@ -16,7 +16,7 @@ spec:
         app: report
     spec:
       containers:
-      - image: 781788730003.dkr.ecr.ap-northeast-2.amazonaws.com/eks/eks-repo/report:v1
+      - image: 781788730003.dkr.ecr.ap-northeast-2.amazonaws.com/eks/eks-repo/report:v2
         name: back-report
         ports:
         - containerPort: 8084
