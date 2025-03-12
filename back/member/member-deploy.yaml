@@ -15,7 +15,9 @@ spec:
       labels:
         app: member
     spec:
-      serviceAccountName: secrets-store-csi-driver 
+      # (1) IRSA 역할이 연결된 ServiceAccount를 사용
+      serviceAccountName: secrets-store-csi-driver
+
       containers:
       - name: back-member
         image: 781788730003.dkr.ecr.ap-northeast-2.amazonaws.com/eks/eks-repo/member:e1
@@ -28,6 +30,13 @@ spec:
           limits:
             memory: "1Gi"
             cpu: "500m"
+
+        # (2) envFrom으로 my-db-secrets (자동 생성되는 K8s Secret) 전체를 환경변수로 주입
+        envFrom:
+        - secretRef:
+            name: my-db-secrets
+
+        # (3) 기존 ConfigMap에서 읽는 부분은 그대로 유지
         env:
         - name: DB_WRITE_USERNAME
           valueFrom:
@@ -49,10 +58,16 @@ spec:
             configMapKeyRef:
               name: backend-config
               key: DB_READ_URL
+
+        # (4) 볼륨 마운트
+        # CSI 드라이버가 SecretObjects를 동기화하려면,
+        # 최소 한 군데는 secretProviderClass 볼륨을 마운트해야 합니다.
         volumeMounts:
         - name: secrets-store-inline
           mountPath: "/mnt/secrets"
           readOnly: true
+
+      # (5) CSI 볼륨 정의
       volumes:
       - name: secrets-store-inline
         csi:
@@ -60,6 +75,7 @@ spec:
           readOnly: true
           volumeAttributes:
             secretProviderClass: "multi-secrets"
+
 ---
 apiVersion: v1
 kind: Service
