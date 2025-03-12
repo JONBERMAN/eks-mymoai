@@ -6,7 +6,6 @@ metadata:
   name: moai-front
   namespace: front-net
 spec:
-  replicas: 1
   selector:
     matchLabels:
       app: front
