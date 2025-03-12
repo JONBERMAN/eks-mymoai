@@ -1,0 +1,20 @@
+F | kubectl apply -f -
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: node-exporter
+  namespace: monitoring
+  labels:
+    release: prometheus-kube-prometheus
+spec:
+  endpoints:
+  - interval: 15s
+    port: http-metrics
+  namespaceSelector:
+    matchNames:
+    - prometheus-node-exporter
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: prometheus-node-exporter
+EOF
+

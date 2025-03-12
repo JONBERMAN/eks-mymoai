@@ -1,0 +1,83 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: kubernetes-scaling-alerts
+  labels:
+    app: prometheus-operator
+    release: prometheus
+spec:
+  groups:
+  - name: kubernetes.scaling.rules
+    rules:
+    - alert: KubernetesNodeOutOfPodCapacity
+      expr: sum by (node) ((kube_pod_status_phase{phase="Running"} == 1) + on(uid, instance) group_left(node) (0 * kube_pod_info{pod_template_hash=""})) / sum by (node) (kube_node_status_allocatable{resource="pods"}) * 100 > 90
+      for: 2m
+      labels:
+        severity: warning
+      annotations:
+        summary: Kubernetes Node out of pod capacity (instance {{ $labels.instance }})
+        description: "Node {{ $labels.node }} is out of pod capacity\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+    - alert: KubernetesNodeNotReady
+      expr: kube_node_status_condition{condition="Ready",status="true"} == 0
+      for: 5m
+      labels:
+        severity: critical
+      annotations:
+        summary: Kubernetes Node not ready (instance {{ $labels.instance }})
+        description: "Node {{ $labels.node }} has been unready for a long time\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+    - alert: KubernetesHpaScaleMaximum
+      expr: (kube_horizontalpodautoscaler_status_desired_replicas >= kube_horizontalpodautoscaler_spec_max_replicas) and (kube_horizontalpodautoscaler_spec_max_replicas > 1) and (kube_horizontalpodautoscaler_spec_min_replicas != kube_horizontalpodautoscaler_spec_max_replicas)
+      for: 2m
+      labels:
+        severity: warning
+      annotations:
+        summary: Kubernetes HPA scale maximum (instance {{ $labels.instance }})
+        description: "HPA {{ $labels.namespace }}/{{ $labels.horizontalpodautoscaler }} has hit maximum number of desired pods\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+    - alert: KubernetesHpaScalingLimited
+      expr: kube_hpa_status_condition{condition="ScalingLimited",status="true"} == 1
+      for: 1m
+      labels:
+        severity: warning
+      annotations:
+        summary: Kubernetes HPA scaling limited (instance {{ $labels.instance }})
+        description: "HPA {{ $labels.namespace }}/{{ $labels.horizontalpodautoscaler }} is limited from scaling\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+    - alert: KubernetesPodPendingTooLong
+      expr: kube_pod_status_phase{phase="Pending"} == 1
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: Kubernetes pod pending too long (instance {{ $labels.instance }})
+        description: "Pod {{ $labels.namespace }}/{{ $labels.pod }} has been in pending state for more than 15 minutes\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+    - alert: KarpenterNodeProvisioningFailed
+      expr: sum(rate(karpenter_nodes_provisioning_errors[5m])) > 0
+      for: 5m
+      labels:
+        severity: critical
+      annotations:
+        summary: Karpenter node provisioning failed
+        description: "Karpenter is failing to provision new nodes\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+    - alert: KubernetesNodeCPUUsageHigh
+      expr: instance:node_cpu_utilisation:rate5m > 0.85
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: Kubernetes node CPU usage high (instance {{ $labels.instance }})
+        description: "Node {{ $labels.node }} CPU usage is above 85%\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+    - alert: KubernetesNodeMemoryUsageHigh
+      expr: (100 * instance:node_memory_utilisation:ratio) > 85
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: Kubernetes node memory usage high (instance {{ $labels.instance }})
+        description: "Node {{ $labels.node }} memory usage is above 85%\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+

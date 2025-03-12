@@ -1,0 +1,7 @@
+
+- job_name: node-exporter-direct
+  scrape_interval: 15s
+  static_configs:
+    - targets:
+      - node-exporter-new-prometheus-node-exporter.monitoring.svc.cluster.local:9101
+

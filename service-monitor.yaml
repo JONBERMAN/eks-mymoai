@@ -1,0 +1,35 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: prometheus-node-exporter
+  namespace: monitoring  # Prometheus가 있는 네임스페이스
+  labels:
+    app.kubernetes.io/name: prometheus-node-exporter
+    app.kubernetes.io/part-of: prometheus-node-exporter
+spec:
+  jobLabel: app.kubernetes.io/name
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: prometheus-node-exporter
+  namespaceSelector:
+    matchNames:
+      - prometheus-node-exporter
+  endpoints:
+  - port: metrics
+    interval: 15s
+    scrapeTimeout: 10s
+    honorLabels: true
+    relabelings:
+    - sourceLabels: [__meta_kubernetes_pod_node_name]
+      separator: ;
+      regex: (.*)
+      targetLabel: node
+      replacement: $1
+      action: replace
+    - sourceLabels: [__address__]
+      separator: ;
+      regex: (.*)
+      targetLabel: instance
+      replacement: $1
+      action: replace
+
