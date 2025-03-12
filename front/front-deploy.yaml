@@ -9,7 +9,7 @@ metadata:
     notifications.argoproj.io/subscribe.on-sync-succeeded.slack: "#dev-취약점"
     notifications.argoproj.io/subscribe.on-sync-failed.slack: "#dev-취약점"
 spec:
-  replicas: 2
+  replicas: 3
   selector:
     matchLabels:
       app: front
