@@ -8,11 +8,11 @@ metadata:
 spec:
   selector:
     matchLabels:
-      app: moai-front
+      app: front    # 기존 셀렉터 유지
   template:
     metadata:
       labels:
-        app: moai-front
+        app: front  # 셀렉터와 일치하도록 유지
     spec:
       containers:
       - image: 781788730003.dkr.ecr.ap-northeast-2.amazonaws.com/eks/eks-repo/moai-front:v40
