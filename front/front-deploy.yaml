@@ -70,7 +70,7 @@ metadata:
     service.beta.kubernetes.io/aws-load-balancer-ssl-ports: "443"
     service.beta.kubernetes.io/aws-load-balancer-ssl-cert: "arn:aws:acm:ap-northeast-2:781788730003:certificate/e3ed6405-6b9b-4d8c-a03f-739b28288055"
     service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
-    service.beta.kubernetes.io/aws-load-balancer-target-group-attributes: "stickiness.enabled=true,stickiness.lb_cookie.duration_seconds=86400"
+    #service.beta.kubernetes.io/aws-load-balancer-target-group-attributes: "stickiness.enabled=true,stickiness.lb_cookie.duration_seconds=86400"
     service.beta.kubernetes.io/aws-load-balancer-subnets: "subnet-0516390c74768a7ef,subnet-07e8033e13c0e5fce"
 spec:
   #ports:
