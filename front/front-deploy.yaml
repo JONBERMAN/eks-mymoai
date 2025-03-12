@@ -14,6 +14,7 @@ spec:
       labels:
         app: front  # 셀렉터와 일치하도록 유지
     spec:
+      replicas: 3
       containers:
       - image: 781788730003.dkr.ecr.ap-northeast-2.amazonaws.com/eks/eks-repo/moai-front:v40
         name: moai-front
