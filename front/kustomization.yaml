@@ -2,3 +2,8 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
 - front-deploy.yaml
+
+images:
+- name: moai-front
+  newName: 781788730003.dkr.ecr.ap-northeast-2.amazonaws.com/eks/eks-repo/moai-front
+  newTag: latest
