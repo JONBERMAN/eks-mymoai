@@ -20,7 +20,7 @@ spec:
 
       containers:
       - name: back-member
-        image: 781788730003.dkr.ecr.ap-northeast-2.amazonaws.com/eks/eks-repo/member:e1
+        image: 781788730003.dkr.ecr.ap-northeast-2.amazonaws.com/eks/eks-repo/member:v1
         ports:
         - containerPort: 8081
         resources:
