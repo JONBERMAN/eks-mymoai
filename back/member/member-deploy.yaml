@@ -16,7 +16,7 @@ spec:
         app: member
     spec:
       containers:
-      - image: 781788730003.dkr.ecr.ap-northeast-2.amazonaws.com/eks/eks-repo/member:v1
+      - image: 781788730003.dkr.ecr.ap-northeast-2.amazonaws.com/eks/eks-repo/member:v2
         name: back-member
         ports:
         - containerPort: 8081
