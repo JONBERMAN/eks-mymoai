@@ -5,20 +5,17 @@ metadata:
     app: moai-front
   name: moai-front
   namespace: front-net
-  annotations:
-    notifications.argoproj.io/subscribe.on-sync-succeeded.slack: "#dev-취약점"
-    notifications.argoproj.io/subscribe.on-sync-failed.slack: "#dev-취약점"
 spec:
+  replicas: 3
   selector:
     matchLabels:
-      app: moai-front
+      app: front
   template:
     metadata:
       creationTimestamp: null
       labels:
-        app: moai-front
+        app: front
     spec:
-      replicas: 3
       containers:
       - image: 781788730003.dkr.ecr.ap-northeast-2.amazonaws.com/eks/eks-repo/moai-front:v40
         name: moai-front
@@ -69,4 +66,4 @@ spec:
   type: LoadBalancer
   loadBalancerClass: service.k8s.aws/nlb
   selector:
-    app: moai-front
+    app: front
