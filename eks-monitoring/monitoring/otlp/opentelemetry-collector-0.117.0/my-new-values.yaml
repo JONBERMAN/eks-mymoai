@@ -1,0 +1,324 @@
+mode: daemonset
+presets:
+  # 인프라 메트릭 수집을 위한 설정
+  hostMetrics:
+    enabled: true  # 호스트 시스템 메트릭 수집 (CPU, 메모리, 디스크 등)
+
+  kubeletMetrics:
+    enabled: true  # 쿠버네티스 Pod, 컨테이너 관련 메트릭 수집
+
+      #clusterMetrics:
+      #enabled: true  # 클러스터 수준의 메트릭 수집
+
+  kubernetesAttributes:
+    enabled: true  # k8s 메타데이터를 메트릭, 트레이스, 로그에 추가
+    extractAllPodLabels: true  # Pod 라벨 정보를 메트릭에 추가
+
+  # 로그 수집을 위한 설정 (Loki로 전송)
+  logsCollection:
+    enabled: true  # 컨테이너 로그 수집
+    includeCollectorLogs: false
+    storeCheckpoints: true  # 로그 체크포인트 저장 (재시작 시 중복 방지)
+    maxRecombineLogSize: 102400
+
+service: ## 이유없음 그냥 ㅎㅐ준거임
+  type: ClusterIP
+  enabled: true
+
+image:
+  repository: otel/opentelemetry-collector-contrib ## loki endpoint를 위해해
+  tag: 0.111.0
+
+
+config:
+  receivers:
+    otlp:
+      protocols:
+        grpc:
+          endpoint: 0.0.0.0:4317  # 모든 네트워크 인터페이스에서 수신
+        http:
+          endpoint: 0.0.0.0:4318
+    filelog:
+      include:
+        - /var/log/pods/*/*/*.log
+      exclude:
+        - /var/log/pods/*/otel-collector/*.log
+      start_at: end
+      include_file_path: true
+      include_file_name: false
+      operators:
+        - type: container
+          id: container-parser  # 컨테이너 로그 파싱
+
+    kubeletstats:
+      collection_interval: 10s
+      auth_type: 'serviceAccount'
+      endpoint: '${env:your_node_name}:10250'
+      insecure_skip_verify: true
+      metric_groups:
+        - node
+        - pod
+        - container
+
+    prometheus:
+      config:
+        scrape_configs:
+          - job_name: 'kubernetes-apiservers'
+            kubernetes_sd_configs:
+              - role: endpoints
+            scheme: https
+            tls_config:
+              ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+            bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+            relabel_configs:
+              - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name]
+                action: keep
+                regex: default;kubernetes;https
+
+          - job_name: 'kubernetes-nodes'
+            scheme: https
+            tls_config:
+              ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+            bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+            kubernetes_sd_configs:
+              - role: node
+            relabel_configs:
+              - action: labelmap
+                regex: __meta_kubernetes_node_label_(.+)
+              - target_label: __address__
+                replacement: kubernetes.default.svc:443
+              - source_labels: [__meta_kubernetes_node_name]
+                regex: (.+)
+                target_label: __metrics_path__
+                replacement: /api/v1/nodes/$1/proxy/metrics
+
+          - job_name: 'kubernetes-pods'
+            kubernetes_sd_configs:
+              - role: pod
+            relabel_configs:
+              - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+                action: keep
+                regex: true
+              - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+                action: replace
+                target_label: __metrics_path__
+                regex: (.+)
+              - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+                action: replace
+                regex: ([^:]+)(?::\d+)?;(\d+)
+                replacement: $1:$2
+                target_label: __address__
+              - action: labelmap
+                regex: __meta_kubernetes_pod_label_(.+)
+              - source_labels: [__meta_kubernetes_namespace]
+                action: replace
+                target_label: kubernetes_namespace
+              - source_labels: [__meta_kubernetes_pod_name]
+                action: replace
+                target_label: kubernetes_pod_name
+
+          - job_name: 'kubernetes-service-endpoints'
+            kubernetes_sd_configs:
+              - role: endpoints
+            relabel_configs:
+              - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scrape]
+                action: keep
+                regex: true
+              - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scheme]
+                action: replace
+                target_label: __scheme__
+                regex: (https?)
+              - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_path]
+                action: replace
+                target_label: __metrics_path__
+                regex: (.+)
+              - source_labels: [__address__, __meta_kubernetes_service_annotation_prometheus_io_port]
+                action: replace
+                target_label: __address__
+                regex: ([^:]+)(?::\d+)?;(\d+)
+                replacement: $1:$2
+              - action: labelmap
+                regex: __meta_kubernetes_service_label_(.+)
+              - source_labels: [__meta_kubernetes_namespace]
+                action: replace
+                target_label: kubernetes_namespace
+              - source_labels: [__meta_kubernetes_service_name]
+                action: replace
+                target_label: kubernetes_name
+  processors:
+    batch:
+      send_batch_size: 10000
+      timeout: 10s
+    memory_limiter:
+      check_interval: 1s
+      limit_percentage: 75
+      spike_limit_percentage: 15
+    k8sattributes:
+      auth_type: 'serviceAccount'
+      extract:
+        metadata:
+          - k8s.namespace.name
+          - k8s.pod.name
+          - k8s.pod.start_time
+          - k8s.pod.uid
+          - k8s.deployment.name
+          - k8s.node.name
+        annotations:
+          - tag_name: a1
+            key: annotation-one
+            from: pod
+          - tag_name: a2
+            key: annotation-two
+            regex: field=(?P<value>.+)
+            from: namespace
+        labels:
+          - tag_name: l1
+            key: label1
+            from: namespace
+          - tag_name: l2
+            key: label2
+            regex: field=(?P<value>.+)
+            from: pod
+      pod_association:
+        - sources:
+            - from: resource_attribute
+              name: k8s.pod.ip
+        - sources:
+            - from: resource_attribute
+              name: k8s.pod.uid
+        - sources:
+            - from: connection
+  exporters:
+    debug: {}
+    prometheus:
+      endpoint: 0.0.0.0:9464
+    otlphttp:
+      endpoint: "http://loki.monitoring.svc.cluster.local:3100/otlp"
+      tls:
+        insecure: true
+    otlp:
+      endpoint: "https://tempo.monitoring.svc.cluster.local:4317"
+      tls:
+        insecure: true
+  service:
+    pipelines:
+      metrics:
+        receivers: [hostmetrics, kubeletstats]
+        processors: [batch, memory_limiter, k8sattributes]
+        exporters: [prometheus]
+      traces:
+        receivers: [otlp]
+        processors: [batch, memory_limiter, k8sattributes]  # k8sattributes 추가
+        exporters: [otlp]
+  # 로그 파이프라인
+      logs:
+        receivers: [filelog]  # otlp 대신 filelog로 변경 (logsCollection preset 사용)
+        processors: [batch, memory_limiter, k8sattributes]  # memory_limiter와 k8sattributes 추가
+        exporters: [otlphttp]
+
+
+
+clusterRole:
+  # 클러스터 역할 생성 여부 설정
+  create: true
+  # 클러스터 역할에 추가할 주석
+  annotations: {}
+  # 사용할 클러스터 역할 이름
+  # 설정하지 않으면 자동으로 생성된 이름을 사용
+  name: otel-collector-opentelemetry-collector
+  # 클러스터 역할 규칙 정의
+  rules:
+    - apiGroups:
+        - ''
+      resources:
+        - events
+        - namespaces
+        - namespaces/status
+        - nodes
+        - nodes/spec
+        - pods
+        - pods/status
+        - replicationcontrollers
+        - replicationcontrollers/status
+        - resourcequotas
+        - services
+        - nodes/stats
+        - nodes/proxy
+      verbs:
+        - get
+        - list
+        - watch
+    - apiGroups:
+        - apps
+      resources:
+        - daemonsets
+        - deployments
+        - replicasets
+        - statefulsets
+      verbs:
+        - get
+        - list
+        - watch
+    - apiGroups:
+        - extensions
+      resources:
+        - daemonsets
+        - deployments
+        - replicasets
+      verbs:
+        - get
+        - list
+        - watch
+    - apiGroups:
+        - batch
+      resources:
+        - jobs
+        - cronjobs
+      verbs:
+        - get
+        - list
+        - watch
+    - apiGroups:
+        - autoscaling
+      resources:
+        - horizontalpodautoscalers
+      verbs:
+        - get
+        - list
+        - watch
+
+  clusterRoleBinding:
+    # 클러스터 역할 바인딩에 추가할 주석
+    annotations: {}
+    # 사용할 클러스터 역할 바인딩 이름
+    # 설정하지 않으면 자동으로 생성된 이름을 사용
+    name: otel-collector-opentelemetry-collector
+resources:
+  limits:
+    cpu: 250m
+    memory: 120Mi
+  requests:
+    cpu: 100m
+    memory: 64Mi
+serviceAccount:
+  # 서비스 어카운트 생성 여부 설정
+  create: true
+  # 서비스 어카운트에 추가할 주석
+  annotations: {}
+  # 사용할 서비스 어카운트 이름
+  # 설정하지 않으면 `create`가 true일 때 자동으로 생성된 이름을 사용
+  name: otel-collector-opentelemetry-collector
+extraEnvs:
+- name: your_node_name
+  valueFrom:
+    fieldRef:
+      fieldPath: status.hostIP
+ports:
+  metrics:
+    enabled: true
+    containerPort: 9464  # Prometheus exporter 포트로 변경
+    servicePort: 9464
+    protocol: TCP
+
+
+

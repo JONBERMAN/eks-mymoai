@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: loki-pv
+spec:
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: gp3
+  awsElasticBlockStore:
+    volumeID: vol-058fa501aaabb4f04  # AWS EBS 볼륨 ID
+    fsType: ext4

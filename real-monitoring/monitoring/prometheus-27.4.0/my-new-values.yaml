@@ -1,0 +1,79 @@
+alertmanager:
+  serviceMonitor:
+    selfMonitor: false
+
+grafana:
+  enabled: false
+
+kubernetesServiceMonitors:
+  enabled: false
+
+kubeApiServer:
+  enabled: false
+
+kubelet:
+  enabled: false
+
+kubeControllerManager:
+  enabled: false
+
+coreDns:
+  enabled: false
+
+kubeDns:
+  enabled: false
+
+kubeEtcd:
+  enabled: false
+
+kubeScheduler:
+  enabled: false
+
+kubeProxy:
+  enabled: false
+
+kubeStateMetrics:
+  enabled: false
+
+kube-state-metrics:
+  enabled: false
+prometheus-node-exporter:
+  enabled: false
+kube-state-metrics:
+  enabled: false
+
+
+
+prometheusOperator:
+  enabled: true
+  resources:
+    limits:
+      cpu: 150m
+      memory: 300Mi
+    requests:
+      cpu: 150m
+      memory: 300Mi
+
+  kubeletService:
+    enabled: false
+  serviceMonitor:
+    selfMonitor: false
+alertmanager:
+  ## If false, alertmanager will not be installed
+  ##
+  enabled: false
+
+
+prometheus:
+  enabled: true
+  serviceMonitor:
+    selfMonitor: false
+  prometheusSpec:
+    enableRemoteWriteReceiver: true
+server:
+  persistentVolume:
+    enabled: true
+    storageClass: "prom"  # 생성한 PV의 storageClassName과 일치시킵니다
+    size: 10Gi
+    accessModes:
+      - ReadWriteOnce

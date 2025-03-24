@@ -1,0 +1,25 @@
+prometheus-node-exporter:
+  enabled: false
+
+kube-state-metrics:
+  enabled: true
+
+prometheus-pushgateway:
+  enabled: false
+
+alertmanager:
+  ## If false, alertmanager will not be installed
+  ##
+  enabled: false
+    
+
+
+server:
+  persistentVolume:
+    enabled: true
+    storageClass: "prom"  # 생성한 PV의 storageClassName과 일치시킵니다
+    size: 10Gi
+    accessModes:
+      - ReadWriteOnce
+  extraFlags:
+    - web.enable-remote-write-receiver
