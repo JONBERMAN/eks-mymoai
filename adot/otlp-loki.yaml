@@ -1,0 +1,97 @@
+mode: daemonset
+presets:  
+  kubernetesAttributes:
+    enabled: true  # k8s 메타데이터를 메트릭, 트레이스, 로그에 추가
+    extractAllPodLabels: true  # Pod 라벨 정보를 메트릭에 추가
+          
+  # 로그 수집을 위한 설정 (Loki로 전송)
+  logsCollection:
+    enabled: true  # 컨테이너 로그 수집
+    includeCollectorLogs: false
+    storeCheckpoints: true  # 로그 체크포인트 저장 (재시작 시 중복 방지)
+    maxRecombineLogSize: 102400
+              
+service: ## 이유없음 그냥 ㅎㅐ준거임
+  type: ClusterIP
+  enabled: true
+        
+image:      
+  repository: otel/opentelemetry-collector-contrib ## loki endpoint를 위해해
+  tag: 0.111.0
+    
+      
+config:
+  receivers:
+    otlp:
+      protocols:
+        grpc:
+          endpoint: 0.0.0.0:4317  # 모든 네트워크 인터페이스에서 수신
+        http:
+          endpoint: 0.0.0.0:4318
+    filelog:
+      include:
+        - /var/log/pods/*/*/*.log
+      exclude:
+        - /var/log/pods/*/otel-collector/*.log
+      start_at: end
+      include_file_path: true
+      include_file_name: false
+      operators:
+        - type: container
+          id: container-parser  # 컨테이너 로그 파싱
+
+  processors:
+    batch:
+      send_batch_size: 5000
+      timeout: 15s
+    memory_limiter:
+      check_interval: 2s
+      limit_percentage: 80
+      spike_limit_percentage: 15
+    k8sattributes:
+      auth_type: 'serviceAccount'
+      extract:
+        metadata:
+          - k8s.namespace.name
+          - k8s.pod.name
+          - k8s.pod.start_time
+          - k8s.pod.uid
+          - k8s.deployment.name
+          - k8s.node.name
+        annotations:
+          - tag_name: a1
+            key: annotation-one
+            from: pod
+          - tag_name: a2
+            key: annotation-two
+            regex: field=(?P<value>.+)
+            from: namespace
+        labels:
+          - tag_name: l1
+            key: label1
+            from: namespace
+          - tag_name: l2
+            key: label2
+            regex: field=(?P<value>.+)
+            from: pod
+      pod_association:
+        - sources:
+            - from: resource_attribute
+              name: k8s.pod.ip
+        - sources:
+            - from: resource_attribute
+              name: k8s.pod.uid
+        - sources:
+            - from: connection
+  exporters:
+    otlphttp:
+      endpoint: "http://loki.monitoring.svc.cluster.local:3100/otlp"
+      tls:
+        insecure: true
+  service:
+    pipelines:
+  # 로그 파이프라인
+      logs:
+        receivers: [filelog]  # otlp 대신 filelog로 변경 (logsCollection preset 사용)
+        processors: [batch, memory_limiter, k8sattributes]  # memory_limiter와 k8sattributes 추가
+        exporters: [otlphttp]

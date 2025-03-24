@@ -11,7 +11,7 @@ spec:
     rules:
     - alert: KubernetesNodeOutOfPodCapacity
       expr: sum by (node) ((kube_pod_status_phase{phase="Running"} == 1) + on(uid, instance) group_left(node) (0 * kube_pod_info{pod_template_hash=""})) / sum by (node) (kube_node_status_allocatable{resource="pods"}) * 100 > 90
-      for: 2m
+      for: 15s
       labels:
         severity: warning
       annotations:
@@ -20,7 +20,7 @@ spec:
 
     - alert: KubernetesNodeNotReady
       expr: kube_node_status_condition{condition="Ready",status="true"} == 0
-      for: 5m
+      for: 10s
       labels:
         severity: critical
       annotations:
@@ -29,7 +29,7 @@ spec:
 
     - alert: KubernetesHpaScaleMaximum
       expr: (kube_horizontalpodautoscaler_status_desired_replicas >= kube_horizontalpodautoscaler_spec_max_replicas) and (kube_horizontalpodautoscaler_spec_max_replicas > 1) and (kube_horizontalpodautoscaler_spec_min_replicas != kube_horizontalpodautoscaler_spec_max_replicas)
-      for: 2m
+      for: 30s
       labels:
         severity: warning
       annotations:
@@ -38,7 +38,7 @@ spec:
 
     - alert: KubernetesHpaScalingLimited
       expr: kube_hpa_status_condition{condition="ScalingLimited",status="true"} == 1
-      for: 1m
+      for: 15s
       labels:
         severity: warning
       annotations:
@@ -47,7 +47,7 @@ spec:
 
     - alert: KubernetesPodPendingTooLong
       expr: kube_pod_status_phase{phase="Pending"} == 1
-      for: 5m
+      for: 15s
       labels:
         severity: warning
       annotations:
@@ -56,7 +56,7 @@ spec:
 
     - alert: KarpenterNodeProvisioningFailed
       expr: sum(rate(karpenter_nodes_provisioning_errors[5m])) > 0
-      for: 5m
+      for: 30s
       labels:
         severity: critical
       annotations:
@@ -65,7 +65,7 @@ spec:
 
     - alert: KubernetesNodeCPUUsageHigh
       expr: instance:node_cpu_utilisation:rate5m > 0.85
-      for: 5m
+      for: 30s
       labels:
         severity: warning
       annotations:
@@ -74,10 +74,26 @@ spec:
 
     - alert: KubernetesNodeMemoryUsageHigh
       expr: (100 * instance:node_memory_utilisation:ratio) > 85
-      for: 5m
+      for: 30s
       labels:
         severity: warning
       annotations:
         summary: Kubernetes node memory usage high (instance {{ $labels.instance }})
         description: "Node {{ $labels.node }} memory usage is above 85%\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
 
+    - alert: KarpenterNodeProvisioningSucceeded
+      expr: increase(karpenter_nodes_created_total[1m]) > 0
+      for: 10s
+      labels:
+        severity: warning
+      annotations:
+        summary: Karpenter node provisioning succeeded
+        description: "Karpenter successfully provisioned new nodes recently.\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+    - alert: KubernetesNodeReady
+      expr: kube_node_status_condition{condition="Ready",status="true"} == 1
+      for: 30s
+      labels:
+        severity: info
+      annotations:
+        summary: "Kubernetes Node is now Ready ({{ $labels.node }})"
+        description: "Node {{ $labels.node }} became ready.\n VALUE = {{ $value }}\n LABELS = {{ $labels }}"
